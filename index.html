@@ -30,8 +30,6 @@
     </style>
     <script>
         header = '';
-        var pref = "http://chiado.dem.ist.utl.pt/dw_rota/";
-        var fold = ".pub/.azores-jul19//kml/";
         var layerst = new Array();
         layerst[0] = ["doc.kml", "24_07_2019_13_13_31.kml-duration=2h24m, 6.8km"];
         layerst.sort();
@@ -82,7 +80,7 @@
             layers[0] = new google.maps.KmlLayer("https://guilhermemeloantunes.github.io/AppKMLVisualization/doc.kml", { suppressInfoWindows: false });
             layers[0].setMap(map);
             //add checkbox
-            toolbar_txt += '<input type="checkbox" onclick="toggle(this,0);" checked >' + layerst[0][1] + '</input><br>';
+            toolbar_txt += '<input type="checkbox" onclick="toggle(this,0);" checked >' + layerst[0][0] + '</input><br>';
             Show(layers[0]);
             toolbar_txt += comment_txt;
             document.getElementById('toolbar').innerHTML = toolbar_txt;
