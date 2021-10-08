@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<!-- JRA 160202 -->
+
+<head>
+    <title>showkml</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="iso-8859-15">
+    <link rel="icon" href="/dw_rota/pics/myicon.png" type="image/x-icon">
+    <style type="text/css">
+        #toolbar {
+            font: 12px arial, sans-serif;
+            text-align: left;
+        }
+
+        #map_canvas {
+            height: 100%;
+        }
+
+        #footer {
+            position: fixed;
+            float: right;
+            right: 0;
+            bottom: 0;
+            margin: 0;
+            z-index: 2;
+            width: 100%;
+            background: white;
+        }
+    </style>
+    <script>
+        header = '';
+        var pref = "http://chiado.dem.ist.utl.pt/dw_rota/";
+        var fold = ".pub/.azores-jul19//kml/";
+        var layerst = new Array();
+        layerst[0] = ["doc.kml", "24_07_2019_13_13_31.kml-duration=2h24m, 6.8km"];
+        layerst.sort();
+        lon_deg = -9.166; lat_deg = 38.727;
+        comment_txt = "";
+
+
+        var layers = new Array(); var map; var toolbar_txt;
+        toolbar_txt = '<span style="font:14px bold arial,sans-serif;color:blue;"><br>' + document.title + header + '<br><br></span>';
+
+        /*
+            MapTypeId.ROADMAP displays the default road map view
+            MapTypeId.SATELLITE displays Google Earth satellite images
+            MapTypeId.HYBRID displays a mixture of normal and satellite views
+            MapTypeId.TERRAIN displays a physical map based on terrain information. 
+        */
+        function initialize() {
+            var mapOptions = {
+                zoom: 11,
+                center: new google.maps.LatLng(lat_deg, lon_deg),
+                mapTypeId: "OSM",
+                mapTypeControl: false,
+                streetViewControl: false
+            };
+
+            map = new google.maps.Map(document.getElementById('map_canvas'),
+                mapOptions);
+
+            //Define OSM map type pointing at the OpenStreetMap tile server
+            map.mapTypes.set("OSM", new google.maps.ImageMapType({
+                getTileUrl: function (coord, zoom) {
+                    // "Wrap" x (longitude) at 180th meridian properly
+                    // NB: Don't touch coord.x: because coord param is by reference, and changing its x property breaks something in Google's lib
+                    var tilesPerGlobe = 1 << zoom;
+                    var x = coord.x % tilesPerGlobe;
+                    if (x < 0) {
+                        x = tilesPerGlobe + x;
+                    }
+                    // Wrap y (latitude) in a like manner if you want to enable vertical infinite scrolling
+
+                    return "https://tile.openstreetmap.org/" + zoom + "/" + x + "/" + coord.y + ".png";
+                },
+                tileSize: new google.maps.Size(256, 256),
+                name: "OpenStreetMap",
+                maxZoom: 18
+            }));
+
+            layers[0] = new google.maps.KmlLayer("https://guilhermemeloantunes.github.io/AppKMLVisualization/doc.kml", { suppressInfoWindows: false });
+            layers[0].setMap(map);
+            //add checkbox
+            toolbar_txt += '<input type="checkbox" onclick="toggle(this,0);" checked >' + layerst[0][1] + '</input><br>';
+            Show(layers[0]);
+            toolbar_txt += comment_txt;
+            document.getElementById('toolbar').innerHTML = toolbar_txt;
+        }
+        //JRA130130: toggle kml =================
+        function Hide(layer) { layer.setMap(null); }
+        function Show(layer) { layer.setMap(map); }
+        function toggle(obj, k) {
+            if (layers[k].getMap()) { Hide(layers[k]); obj.checked = false; }
+            else { Show(layers[k]); obj.checked = true; }
+        }
+        //JRA130130: toggle kml =================
+
+        function loadScript() {
+            var script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = 'https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&' +
+                'callback=initialize';
+            document.body.appendChild(script);
+        }
+    </script>
+</head>
+
+<body onload="loadScript()">
+    <div id="footer"> &copy; OSM </div>
+    <div id="map_canvas" style="float:right; border: 1px solid black; width:80%; height:700px;">
+    </div>
+    <div id="toolbar" width="20%"></div>
+</body>
+
+</html>
